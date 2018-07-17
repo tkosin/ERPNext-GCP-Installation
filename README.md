@@ -29,11 +29,11 @@ You should be able to verify its version.
 You will see the following output.
 
     Yod@erp.site.io:~$ python -V
-    Python 2.7.13
+    Python 2.7.15rc1
 
 # Install a few more dependencies
 
-    sudo apt -y install git build-essential python-setuptools python-dev libffi-dev libssl-dev
+    sudo apt -y install git build-essential software-properties-common python-setuptools python-dev libffi-dev libssl-dev vim
 
 # Install Python's pip tool
 
@@ -69,7 +69,7 @@ Provide a strong password for the MariaDB root user when asked.
 
 The Barracuda storage engine is required for the creation of ERPNext databases, so you will need to configure MariaDB to use the Barracuda storage engine. Edit the default MariaDB configuration file `my.cnf`.
 
-    sudo nano /etc/mysql/my.cnf
+    sudo vi /etc/mysql/my.cnf
 
 Add the following lines under the `[mysqld]` line.
 
@@ -79,10 +79,6 @@ Add the following lines under the `[mysqld]` line.
     character-set-client-handshake = FALSE
     character-set-server = utf8mb4
     collation-server = utf8mb4_unicode_ci
-
-Also, add the following line under the `[mysql]` line.
-
-    default-character-set = utf8mb4
 
 Restart MariaDB and enable it to automatically start at boot time.
 
@@ -94,6 +90,21 @@ Before configuring the database, you will need to secure MariaDB. You can secure
     sudo mysql_secure_installation
 
 You will be asked for the current MariaDB root password. Provide the password you have set during the installation. You will be asked if you wish to change the existing password of the root user of your MariaDB server. You can skip setting a new password, as you have already provided a strong password during installation. Answer `Y` to all of the other questions that are asked.
+
+Login to MariaDB using root user via `mysql -uroot -p` to ensure that setting is properly work. You will get response like this.
+
+	Enter password:
+	Welcome to the MariaDB monitor.  Commands end with ; or \g.
+	Your MariaDB connection id is 3
+	Server version: 10.1.29-MariaDB-6 Ubuntu 18.04
+
+	Copyright (c) 2000, 2017, Oracle, MariaDB Corporation Ab and others.
+
+	Type 'help;' or '\h' for help. Type '\c' to clear the current input statement.
+
+	MariaDB [(none)]>
+	
+For unexpected response like `ERROR 1698 (28000): Access denied for user 'root'@'localhost'` even you ware enter the right password is cause from default authentication plugin for user root, solution is clearly explain in this [link: Authentication Plugin](https://mariadb.com/kb/en/library/authentication-plugin-unix-socket/)
 
 # Install Nginx, Node.js and Redis
 
@@ -165,7 +176,9 @@ Clone the Bench repository in /opt/bench.
 
     sudo pip install -e bench-repo
 
-Once Bench is installed, proceed further to install ERPNext using Bench.
+Once Bench is installed, proceed further to install ERPNext using Bench. Before that, make sure that .config directory is accessible for user bench? If not, do the following command
+
+	sudo chown -R bench:bench .config
 
 # Install ERPNext using Bench
 
